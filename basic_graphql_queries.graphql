@@ -1,0 +1,41 @@
+query GetLibrospg {
+  librospg {
+    categorias
+		autor
+		isbn
+		titulo
+		copias_disponibles
+		_id
+  }
+}
+
+query GetPrestamospg {
+  prestamospg {
+    estado
+		fecha_devolucion
+		fecha_prestamo
+		_id
+		libro_id
+		usuario_id
+  }
+}
+
+query GetUsuariospg {
+  usuariospg {
+    prestamos_activos
+		email
+		nombre
+		_id
+  }
+}
+
+query GetValoracionespg {
+  valoracionespg {
+    fecha_resena
+		_id
+		libro_id
+		usuario_id
+		valoracion
+		contenido
+  }
+}

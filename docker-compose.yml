@@ -1,0 +1,61 @@
+services:
+  postgres:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: gvd
+      POSTGRES_PASSWORD: gvd_24
+      POSTGRES_DB: gvd_database
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres/init-scripts:/docker-entrypoint-initdb.d #scripts para inicializar
+      - ./postgres/data:/var/lib/postgresql/data #volumen de datos fuera del contenedor docker
+  
+  mongo:
+    image: mongo:latest
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: gvd_24
+      MONGO_INITDB_DATABASE: gvd_database_mongo
+    volumes:
+      - ./mongodb/data:/data/db
+      - ./mongodb/init-scripts/init.js:/docker-entrypoint-initdb.d/init.js #scripts para inicializar
+  
+  hasura:
+      image: hasura/graphql-engine:latest
+      restart: always
+      depends_on:
+        - postgres
+      ports:
+        - "8080:8080"
+      environment:
+        HASURA_GRAPHQL_DATABASE_URL: postgres://gvd:gvd_24@postgres:5432/gvd_database
+        HASURA_GRAPHQL_ADMIN_SECRET: gvd_24
+        HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+        HASURA_GRAPHQL_METADATA_DEFAULTS: '{"backend_configs":{"dataconnector":{"Mongo":{"uri":"http://mongodb-connector:3000"}}}}'
+
+  mongo-express:
+    image: mongo-express:latest
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: gvd_24
+      ME_CONFIG_MONGODB_URL: mongodb://root:gvd_24@mongo:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: root
+      ME_CONFIG_BASICAUTH_PASSWORD: gvd_24
+    depends_on:
+      - mongo
+
+
+  mongodb-connector:
+    image: hasura/mongo-data-connector:latest
+    restart: always
+    ports:
+      - 3000:3000
+    depends_on:
+      - hasura
+      - mongo
