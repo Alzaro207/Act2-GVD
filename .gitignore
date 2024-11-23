@@ -1,0 +1,5 @@
+# Ignorar archivos generados por MongoDB
+mongodb/data/
+
+# Ignorar archivos generados por PostgreSQL
+postgres/data/
